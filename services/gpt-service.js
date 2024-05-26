@@ -27,7 +27,7 @@ class GptService extends EventEmitter {
     const stream = await this.openai.chat.completions.create({
       // ft:gpt-3.5-turbo-0125:aireception::9JkGmPmL
       // gpt-4-turbo
-      model: 'ft:gpt-3.5-turbo-0125:aireception::9MI8gxCD',
+      model: 'gpt-4-turbo',
       messages: this.userContext,
       stream: true,
     });
