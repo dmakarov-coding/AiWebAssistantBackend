@@ -15,45 +15,6 @@ datasource db {
 }
 
 model User {
-  id                      String        @id @unique
-  name                    String?
-  email                   String        @unique
-  stripeCustomerId        String?       @unique
-  colorScheme             String        @default("theme-blue")
-  phoneNumber             String?       @default("NA")
-  businessDescription     String?
-  productInformation      String?
-  contactInformation      String?
-  teamInformation         String?
-  paymentInformation      String?
-  receptionistInformation String?
-  greetingInformation     String?
-  customerInformation     String?
-  sequenceInformation     String?
-  promptInformation       String?
-  voiceName               String        @default("voice-ryan")
-  callRecording           Boolean       @default(false)
-  Subscription            Subscription?
-}
-
-model Subscription {
-  stripeSubscriptionId String   @id @unique
-  invterval            String
-  status               String
-  planId               String
-  currentPeriodStart   Int
-  currentPeriodEnd     Int
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  user                 User     @relation(fields: [userId], references: [id])
-  maxTime              Int      @default(0)
-  currTimeUsed         Int      @default(0)
-  userId               String   @unique
-}
-
-model ActiveNumber {
-  id         String  @id @unique
-  number     String  @unique
-  isAssigned Boolean @default(false)
-  country    String
+  id                String  @id
+  promptInformation String?
 }

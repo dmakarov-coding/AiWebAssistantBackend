@@ -1,8 +1,11 @@
+//This line imports and immediately invokes the config method from the dotenv package.
+// dotenv is a module that loads environment variables from a .env file into process.env.
 require('dotenv').config();
 require('colors');
+//Set up a Node.js server using the Express framework with WebSocket support.
 const express = require('express');
+//ExpressWs is a library that adds WebSocket support to Express applications.
 const ExpressWs = require('express-ws');
-
 
 const {createClient} = require('@supabase/supabase-js');
 
@@ -12,14 +15,40 @@ const {TranscriptionService} = require('./services/transcription-service');
 const {TextToSpeechService} = require('./services/tts-service-ryan');
 const {TextToSpeechService2} = require('./services/tts-11labs-service-richard');
 const {TextToSpeechService3} = require('./services/tts-11labs-service-ayanna');
+//By importing the VoiceResponse class, you can generate TwiML instructions for voice calls.
+//TwiML (Twilio Markup Language) is a set of XML instructions that inform Twilio how to handle
+// various communication events, such as incoming calls or messages.
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
+//Module: Voice is a specific module within the Twilio SDK for handling voice calls.
 const Voice = require("twilio/lib/rest/Voice");
+//Prisma is an ORM that helps to interact with databases.
+// It provides a powerful set of tools for working with databases, including query building,
+// schema migrations, and data modeling.
+//PrismaClient is the primary class provided by Prisma to interact with your database.
+// It allows you to perform CRUD (Create, Read, Update, Delete) operations and run queries
+// against your database using a JavaScript or TypeScript API.
+
+
+
+
+
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+
+
+
+//Axios is a JavaScript library used for making HTTP requests from both the browser and Node.js
 const axios = require('axios');
-
-
+//Set up a Node.js server using the Express framework with WebSocket support provided by the Express-WS library.
+//The express() function returns an Express application object that can be used to define routes, middleware,
+// and handle HTTP requests and responses.
 const app = express();
+//ExpressWs is a library that adds WebSocket support to Express applications.
+//It extends the Express application object to handle WebSocket connections alongside regular HTTP routes.
 ExpressWs(app);
 let statement = false;
+//Set the port 3000 on which the server will listen
 const PORT = process.env.PORT || 3000;
 
 // app.post('/voice', (request, response) => {
@@ -45,10 +74,8 @@ app.post('/incoming', async (req, res) => {
     const calledPhoneNumber = req.body.To;
     console.log(`Calling to number: ${calledPhoneNumber}`);
 
-    // Hardcoded user data
-    const user = {
+    const baseUser = {
         greetingInformation: "Hello! Thanks for calling.",
-        promptInformation: "How can I assist you today?",
         callRecording: true,
         voiceName: "voice-richard",
         Subscription: {
@@ -56,6 +83,27 @@ app.post('/incoming', async (req, res) => {
             currTimeUsed: 300 // 5 minutes used
         }
     };
+
+    // Fetch promptInformation from the database
+    const users = await prisma.user.findMany({
+        where: {
+            id: 'kp_17aff834e67c44a3a6d069bd9eb81137'
+        },
+        select: {
+            promptInformation: true,
+        }
+    });
+
+    // Check if the user was found and update the base user object
+    const fetchedUser = users[0];
+    // Merge the fetched promptInformation with the baseUser
+    const user = {
+        ...baseUser,
+        promptInformation: fetchedUser.promptInformation
+    };
+
+    // Now `user` contains both the fetched and the manually set data
+    console.log(user);
 
     dynamicGreeting = user.greetingInformation;
     gptService = new GptService(user.promptInformation);
