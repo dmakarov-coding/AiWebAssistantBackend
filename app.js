@@ -3,6 +3,7 @@ require('colors');
 const express = require('express');
 const ExpressWs = require('express-ws');
 
+
 const {createClient} = require('@supabase/supabase-js');
 
 const {GptService} = require('./services/gpt-service');
@@ -136,8 +137,10 @@ app.ws('/connection', async (ws) => {
             callStartTime = new Date(); // Record the start time of the call
             console.log("Start")
             console.log(`Twilio -> Starting Media Stream for ${streamSid}`.underline.red);
+            //Convert text to speech through  ElevenLabs or Open_AI
             ttsService.generate({partialResponseIndex: null, partialResponse: dynamicGreeting}, 1);
         } else if (msg.event === 'media') {
+            //Convert audio file to test through Deepgram
             transcriptionService.send(msg.media.payload);
         } else if (msg.event === 'mark') {
             const label = msg.mark.name;
