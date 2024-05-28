@@ -12,7 +12,6 @@ const {createClient} = require('@supabase/supabase-js');
 const {GptService} = require('./services/gpt-service');
 const {StreamService} = require('./services/stream-service');
 const {TranscriptionService} = require('./services/transcription-service');
-const {TextToSpeechService} = require('./services/tts-service-ryan');
 const {TextToSpeechService2} = require('./services/tts-11labs-service-richard');
 const {TextToSpeechService3} = require('./services/tts-11labs-service-ayanna');
 //By importing the VoiceResponse class, you can generate TwiML instructions for voice calls.
@@ -27,17 +26,8 @@ const Voice = require("twilio/lib/rest/Voice");
 //PrismaClient is the primary class provided by Prisma to interact with your database.
 // It allows you to perform CRUD (Create, Read, Update, Delete) operations and run queries
 // against your database using a JavaScript or TypeScript API.
-
-
-
-
-
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-
-
-
-
 //Axios is a JavaScript library used for making HTTP requests from both the browser and Node.js
 const axios = require('axios');
 //Set up a Node.js server using the Express framework with WebSocket support provided by the Express-WS library.
@@ -51,22 +41,12 @@ let statement = false;
 //Set the port 3000 on which the server will listen
 const PORT = process.env.PORT || 3000;
 
-// app.post('/voice', (request, response) => {
-//   // Get information about the incoming call, like the city associated
-//   // with the phone number (if Twilio can discover it)
-//   const city = request.body.FromCity;
-//   console.log(`Calling to number: ${city}`);
-// });
 
 app.use(express.urlencoded({extended: true}));
 let gptService; // Define gptService at a higher scope
 let dynamicGreeting = "Welcome to our service.";
-let remainingTime; // Declare this at the top level for wider scope
 const phoneNumberMap = new Map();
 let num = 0;
-let recordCall = false;
-
-let ryan = 0;
 let richard = 0;
 let ayanna = 0;
 
@@ -76,7 +56,6 @@ app.post('/incoming', async (req, res) => {
 
     const baseUser = {
         greetingInformation: "Hello! Thanks for calling.",
-        callRecording: true,
         voiceName: "voice-richard",
         Subscription: {
             maxTime: 600, // 10 minutes
@@ -109,30 +88,10 @@ app.post('/incoming', async (req, res) => {
     gptService = new GptService(user.promptInformation);
     console.log(user.callRecording);
 
-    if (user.voiceName === "voice-ryan") {
-        ryan = 1;
-    } else if (user.voiceName === "voice-richard") {
+    if (user.voiceName === "voice-richard") {
         richard = 1;
     } else if (user.voiceName === "voice-ayanna") {
         ayanna = 1;
-    }
-
-    if (user.callRecording) {
-        recordCall = true;
-    }
-
-    // Check if the current time used is greater than or equal to max time allowed
-    if (user.Subscription.currTimeUsed >= user.Subscription.maxTime) {
-        console.log("Current time used exceeds or equals the maximum time allowed. Ending call.");
-        const voiceResponse = new VoiceResponse();
-        voiceResponse.say("Your maximum allowed time has been reached. Please upgrade your plan or wait until renewed.");
-        voiceResponse.hangup();  // Optionally add a hangup command
-        res.type('text/xml');
-        res.send(voiceResponse.toString());
-        return;
-    } else {
-        remainingTime = user.Subscription.maxTime - user.Subscription.currTimeUsed;
-        console.log(remainingTime);
     }
 
     res.status(200);
@@ -154,14 +113,11 @@ app.ws('/connection', async (ws) => {
     let streamSid;
     let callSid;
     let persons_phone_number;
-    let callStartTime;
     const streamService = new StreamService(ws);
     const transcriptionService = new TranscriptionService();
     let ttsService;
 
-    if (ryan === 1) {
-        ttsService = new TextToSpeechService({});
-    } else if (richard === 1) {
+    if (richard === 1) {
         ttsService = new TextToSpeechService2({});
     } else if (ayanna === 1) {
         ttsService = new TextToSpeechService3({});
@@ -182,7 +138,6 @@ app.ws('/connection', async (ws) => {
             console.log(`WebSocket connection for ${persons_phone_number}`);
             streamService.setStreamSid(streamSid);
             gptService.setCallSid(callSid);
-            callStartTime = new Date(); // Record the start time of the call
             console.log("Start")
             console.log(`Twilio -> Starting Media Stream for ${streamSid}`.underline.red);
             //Convert text to speech through  ElevenLabs or Open_AI
@@ -196,17 +151,8 @@ app.ws('/connection', async (ws) => {
             marks = marks.filter(m => m !== msg.mark.name);
         } else if (msg.event === 'stop') {
             console.log(`Twilio -> Media stream ${streamSid} ended.`.underline.red);
-            const callEndTime = new Date();
-            const callDuration = (callEndTime - callStartTime) / 1000;
-            const roundedDuration = Math.round(callDuration);
-            console.log(`Call ended at: ${callEndTime.toLocaleTimeString()} - Duration: ${roundedDuration} seconds`);
-            console.log(persons_phone_number);
-            ryan = 0;
             richard = 0;
             ayanna = 0
-            recordCall = false;
-
-
             phoneNumberMap.delete(callSid);
             console.log(phoneNumberMap);
             ws.close(); // Close WebSocket connection
