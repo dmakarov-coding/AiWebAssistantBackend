@@ -1,3 +1,4 @@
+//This module is used to add color to the console output, making it easier to read debug and log messages.
 require('colors');
 const EventEmitter = require('events');
 const OpenAI = require('openai');
