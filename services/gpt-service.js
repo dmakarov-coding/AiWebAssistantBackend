@@ -2,7 +2,7 @@
 require('colors');
 const EventEmitter = require('events');
 const OpenAI = require('openai');
-
+//test
 
 class GptService extends EventEmitter {
   constructor(businessDescription) {
