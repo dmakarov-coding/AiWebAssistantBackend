@@ -140,7 +140,7 @@ app.ws('/connection', async (ws) => {
             gptService.setCallSid(callSid);
             console.log("Start")
             console.log(`Twilio -> Starting Media Stream for ${streamSid}`.underline.red);
-            //Convert text to speech through  ElevenLabs or Open_AI
+            //Convert text to speech through  ElevenLabs
             ttsService.generate({partialResponseIndex: null, partialResponse: dynamicGreeting}, 1);
         } else if (msg.event === 'media') {
             //Convert audio file to test through Deepgram
