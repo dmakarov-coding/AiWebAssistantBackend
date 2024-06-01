@@ -50,8 +50,8 @@ class TextToSpeechService3 extends EventEmitter {
           },
           // TODO: Pull more config? https://docs.elevenlabs.io/api-reference/text-to-speech-stream
           body: JSON.stringify({
-            model_id: process.env.XI_MODEL_ID,
-            text: partialResponse,
+            model_id: process.env.XI_MODEL_ID, //The model ID for the text-to-speech generation, retrieved from environment variable
+            text: partialResponse, //The text to be converted to speech
           }),
         }
       );
