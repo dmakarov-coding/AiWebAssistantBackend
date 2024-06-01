@@ -12,13 +12,12 @@ WORKDIR /app
 # Set production environment
 ENV NODE_ENV="production"
 
-
 # Throw-away build stage to reduce size of final image
 FROM base as build
 
-# Install packages needed to build node modules
+# Install packages needed to build node modules and ffmpeg for media processing
 RUN apt-get update -qq && \
-    apt-get install -y build-essential pkg-config python-is-python3
+    apt-get install -y build-essential pkg-config python-is-python3 ffmpeg
 
 # Install node modules
 COPY --link package-lock.json package.json ./
@@ -27,9 +26,14 @@ RUN npm ci
 # Copy application code
 COPY --link . .
 
+# Run prisma generate to generate the Prisma client
+RUN npx prisma generate
 
 # Final stage for app image
 FROM base
+
+# Install ffmpeg in the final image to ensure it's available at runtime
+RUN apt-get update -qq && apt-get install -y ffmpeg
 
 # Copy built application
 COPY --from=build /app /app
