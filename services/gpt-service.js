@@ -26,6 +26,8 @@ class GptService extends EventEmitter {
     this.partialResponseIndex = 0;
   }
 
+  // Add the callSid to the chat context in case
+  // ChatGPT decides to transfer the call.
   setCallSid(callSid) {
     //This line adds a new object to the userContext array. The object has two properties:
     //'role': 'system': This specifies that the role of this message is system,
