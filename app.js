@@ -39,10 +39,8 @@ ExpressWs(app);
 let statement = false;
 //Set the port 3000 on which the server will listen
 const PORT = process.env.PORT || 3000;
-
-
 //This line adds middleware to the Express application to parse URL-encoded data from incoming HTTP requests.
-// It enables the application to parse form data submitted via POST requests.
+//It enables the application to parse form data submitted via POST requests.
 //The express.urlencoded() middleware parses incoming request bodies and makes the parsed data available
 //in req.body. Setting {extended: true} allows the parsing of nested objects in the URL-encoded data.
 app.use(express.urlencoded({extended: true}));
@@ -62,6 +60,7 @@ app.post('/incoming', async (req, res) => {
     //This line retrieves the phone number that the incoming call is directed to.
     //It extracts the value of the 'To' property from the body of the incoming request.
     const calledPhoneNumber = req.body.To;
+
     //Log the phone number being called to the console.
     console.log(`Calling to number: ${calledPhoneNumber}`);
 
@@ -105,7 +104,7 @@ app.post('/incoming', async (req, res) => {
     //This user.promptInformation is business description.
     gptService = new GptService(user.promptInformation);
 
-    console.log(user.callRecording);
+    //console.log(user.callRecording);
 
     //Check wchich voice to use.
     if (user.voiceName === "voice-richard") {
@@ -244,7 +243,7 @@ app.ws('/connection', async (ws) => {
     //This code used for detecting interuptions.
     transcriptionService.on('utterance', async (text) => {
 
-        // This is a bit of a hack to filter out empty utterances
+        //This is a bit of a hack to filter out empty utterances
         //This conditional statement checks if there are any items in the marks array
         //and if the text variable is not empty and has a length greater than 5.
         if (marks.length > 0 && text?.length > 5) {
