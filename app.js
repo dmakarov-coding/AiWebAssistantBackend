@@ -104,8 +104,6 @@ app.post('/incoming', async (req, res) => {
     //This user.promptInformation is business description.
     gptService = new GptService(user.promptInformation);
 
-    //console.log(user.callRecording);
-
     //Check wchich voice to use.
     if (user.voiceName === "voice-richard") {
         richard = 1;
